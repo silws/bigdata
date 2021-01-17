@@ -4,6 +4,7 @@ import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.*;
 import com.rest.dbserver.db.config.FirebaseInitializer;
 import com.rest.dbserver.db.model.Event;
+import com.rest.dbserver.db.model.Notification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,8 +21,15 @@ public class DatabaseService {
     private CollectionReference getEventsCollection() {
         return db.getDb().collection("events");
     }
+    private CollectionReference getNotificationsCollection() {
+        return db.getDb().collection("notifications");
+    }
     public void saveEvent(Event eventModel) {
         ApiFuture<WriteResult> collectionApiFuture = getEventsCollection().document(Long.toString(System.currentTimeMillis())).set(eventModel);
+    }
+
+    public void saveNotification(Notification notificationModel) {
+        ApiFuture<WriteResult> collectionApiFuture = getNotificationsCollection().document(Long.toString(System.currentTimeMillis())).set(notificationModel);
     }
 
     public Event getEvent(String id) {
@@ -62,5 +70,24 @@ public class DatabaseService {
             e.printStackTrace();
         }
         return events;
+    }
+
+    public List<Notification> getNotifications() {
+        ApiFuture<QuerySnapshot> queryFuture = getNotificationsCollection().get();
+        List<Notification> notifications = new ArrayList<>();
+        try {
+            QuerySnapshot querySnapshot = queryFuture.get();
+            querySnapshot.getDocuments().forEach(queryDocumentSnapshot -> {
+                Notification notification;
+                notification = queryDocumentSnapshot.toObject(Notification.class);
+                notification.setId(queryDocumentSnapshot.getId());
+                notifications.add(notification);
+            });
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+        return notifications;
     }
 }

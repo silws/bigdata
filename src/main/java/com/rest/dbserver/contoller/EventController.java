@@ -34,6 +34,7 @@ public class EventController {
     @ResponseStatus(code = HttpStatus.OK)
     public List<Event> getEvents() {
         List<Event> events = databaseService.getEvents();
+        System.out.println(events);
         return events;
     }
 }
